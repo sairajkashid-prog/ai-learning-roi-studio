@@ -317,9 +317,10 @@ input[type=range]::-moz-range-thumb{
   color:var(--emerald-l); margin:6px 0}
 .prop-summary .ps-d{font-size:.82rem; color:var(--champ)}
 
-/* ========== SCROLL REVEAL ========== */
+/* ---------- SCROLL REVEAL ---------- */
 .reveal{opacity:0; transform:translateY(40px); transition:opacity .8s ease, transform .8s ease}
 .reveal.in{opacity:1; transform:none}
+.reveal.no-io{opacity:1; transform:none}
 
 /* ========== FOOTER ========== */
 footer{padding:40px 20px; text-align:center; border-top:1px solid var(--glass-b); margin-top:40px}
@@ -700,22 +701,27 @@ const BENCH={
       <div class="val">${d.v}M</div><div class="label">${d.l}</div></div>`;
   }).join('');
   // animate heights when scrolled into view
-  const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
+  if(typeof IntersectionObserver!=='undefined'){
+    const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
     c.querySelectorAll('.bar3d').forEach((b,i)=>{
       setTimeout(()=>{b.style.height=b.dataset.h+'px'},i*100);
     });
     obs.disconnect();
   }})},{threshold:0.3});
   obs.observe(c);
+  }else{c.querySelectorAll('.bar3d').forEach((b,i)=>{setTimeout(()=>{b.style.height=b.dataset.h+'px'},i*100);});}
 })();
 
 /* ============ SCROLL REVEAL ============ */
+if(typeof IntersectionObserver!=='undefined'){
 const revObs=new IntersectionObserver((es)=>{es.forEach(e=>{
   if(e.isIntersecting){e.target.classList.add('in');revObs.unobserve(e.target)}
 })},{threshold:0.12});
 document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));}
 
 /* ============ ANIMATED COUNTERS ============ */
+if(typeof IntersectionObserver!=='undefined'){
 const countObs=new IntersectionObserver((es)=>{es.forEach(e=>{
   if(e.isIntersecting){
     const el=e.target, target=el.dataset.count, suffix='';
@@ -735,6 +741,13 @@ document.querySelectorAll('[data-count]').forEach(el=>{
   else if(v==='24'||v==='35'||v==='85'){el.textContent='0%';countObs.observe(el);
     el._fmt=(c)=>Math.round(c)+'%'}
 });
+}else{
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const v=el.dataset.count;
+    if(v==='1300'){el.textContent='$1.3B'}
+    else{el.textContent=v+'%'}
+  });
+}
 
 /* ============ FORMAT HELPERS ============ */
 function fmtINR(n){
